@@ -1,17 +1,29 @@
-/* eslint-disable no-console */
-import { component$, useStore } from '@builder.io/qwik'
+// import { component$ } from '@builder.io/qwik'
+
+// export default component$(() => {
+//   return (
+//     <a href="/" onClick$={() => window.open('http://qwik.builder.io')}>
+//       click me!
+//     </a>
+//   )
+// })
+
+import { component$, useClientEffect$, useSignal } from '@builder.io/qwik'
 
 export default component$(() => {
-  const store = useStore({ x: 0, y: 0 })
+  const aHref = useSignal<Element>()
+  useClientEffect$(() => {
+    const handler = (event: Event) => {
+      event.preventDefault()
+      window.open('http://qwik.builder.io')
+    }
+    aHref.value!.addEventListener('click', handler)
+    return () => aHref.value!.removeEventListener('click', handler)
+  })
+
   return (
-    <div
-      onMouseMove$={(event) => {
-        store.x = event.clientX
-        store.y = event.clientY
-        console.log(store)
-      }}
-    >
-      Your mouse location is ({store.x}, {store.y}).
-    </div>
+    <a href="/" ref={aHref}>
+      click me!
+    </a>
   )
 })
