@@ -1,12 +1,43 @@
-import { component$, useStore } from '@builder.io/qwik'
+import type { QRL } from "@builder.io/qwik";
+import { component$, useStore, $ } from "@builder.io/qwik";
 
+interface ParentStore {
+  name: string;
+  children: ChildStore[];
+  greetNames: QRL<(parent: ParentStore) => void>;
+  deep?: boolean;
+}
+interface ChildStore {
+  name: string;
+  parent: ParentStore;
+}
 export default component$(() => {
-  const counter = useStore({ count: 0 })
+  const parent: ParentStore = {
+    name: "Builder.io",
+    children: [],
+    greetNames: $((parent) => alert(parent.name)),
+  };
+
+  parent.children = [
+    { name: "Qwik", parent },
+    { name: "Partytown", parent },
+  ];
+
+  const parentStore = useStore<ParentStore>(parent);
 
   return (
     <>
-      <div>Count: {counter.count}</div>
-      <button onClick$={() => counter.count++}>+1</button>
+      {parentStore.name}
+      <button onClick$={async () => await parentStore.greetNames(parent)}>
+        alert
+      </button>
+      <ul>
+        {parentStore.children.map((child) => (
+          <li>
+            {child.name} -&lt; {child.parent.name}
+          </li>
+        ))}
+      </ul>
     </>
-  )
-})
+  );
+});
